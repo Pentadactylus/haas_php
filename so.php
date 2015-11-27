@@ -44,6 +44,9 @@ switch( $action ) {
     case 'getimages':
         $output = Controller::getOSImages();
         break;
+    case 'getsshpublickeys':
+        $output = Controller::getRegisteredSSHKeys();
+        break;
     default:
         break;
 }

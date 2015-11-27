@@ -89,6 +89,20 @@ class Controller {
         }
         return json_encode( $retVal );
     }
+
+    public static function getRegisteredSSHKeys() {
+        $command = "nova keypair-list";
+        $keypairOutput = self::openStackCommand( $command );
+        $haystack = explode( "\n", $keypairOutput );
+        $retVal = Array();
+        for( $i=3; $i<count($haystack)-1; $i++ ) {
+            $stack = explode( "|", $haystack[$i]);
+            $out = trim($stack[1]);
+            if( $out!="")
+                array_push( $retVal, Array( "fingerprint" => trim($stack[2]), "publickey" => trim($stack[1])));
+        }
+        return json_encode( $retVal );
+    }
 }
 
 ?>

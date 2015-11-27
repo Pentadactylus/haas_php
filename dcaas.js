@@ -2,42 +2,31 @@
 // activate special checkbox rendering
 $(':checkbox').checkboxpicker();
 
+var navigationContent = Array();
+
 var navigationEntries = [
     {"href":"tab_main", "active" : "1", "value" : "Main", "class" : "MainTabClass" },
-    {"href":"tab_service", "value" : "Service"},
-    {"href":"tab_system", "value" : "System"},
-    {"href":"tab_os", "value" : "OS", "id" : "tab_os_field"},
-    {"href":"tab_access", "value" : "Access"},
-    {"href":"tab_distrproc", "value" : "Distributed Processing"},
-    {"href":"tab_deployment", "value" : "Deployment"},
-    {"href":"tab_organisation", "value" : "Cluster Organisation"}
+    {"href":"tab_service", "value" : "Service", "class" : "ServiceTabClass" },
+    {"href":"tab_system", "value" : "System", "class" : "SystemTabClass" },
+    {"href":"tab_os", "value" : "OS", "id" : "tab_os_field", "class" : "OSTabClass" },
+    {"href":"tab_access", "value" : "Access", "class" : "AccessTabClass" },
+    {"href":"tab_distrproc", "value" : "Distributed Processing", "class" : "DistrProcTabClass" },
+    {"href":"tab_deployment", "value" : "Deployment", "class" : "DeploymentTabClass" },
+    {"href":"tab_organisation", "value" : "Cluster Organisation", "class" : "ClusterTabClass" }
 ];
+
 $.each(navigationEntries, function(i,item) {
     var act = item.active==1 ? " class=\"active\"":"";
     var id = item.id != 'undefined' ? " id=\""+item.id+"\"" : "";
     var listElem = "<li"+act+"><a href=\"#"+item.href+"\""+id+" data-toggle=\"tab\">"+item.value+"</a></li>";
     $("#navigationEntries").append(listElem);
-});
 
-
-$( "#initialize" ).addClass("disabled");
-$( "#initialize" ).click(function() {
-    if( !$( "#initialize" ).hasClass("disabled") ) {
-        alert( "Handler for .click() called." );
-    }
-    else {
-        alert( "element not clickable" );
+    if( item.class!==undefined ) {
+        test = eval("new "+item.class+"( \"#navigationContent\" )");
+        test.drawInterface();
     }
 });
 
-$( "#getstate" ).click(function() {
-    if( !$( "#getstate" ).hasClass("disabled") ) {
-        alert( "Handler for .click() called." );
-    }
-    else {
-        alert( "element not clickable" );
-    }
-});
 
 $( "#deploy" ).click(function() {
     if( !$( "#deploy" ).hasClass("disabled") ) {
@@ -141,11 +130,6 @@ $( "#servicetypebutton" ).click(function() {
         data: {action: 'servicetype', token: $("#tokenid").val(), tenant: $("#tenantid").val(), url: 'http://localhost:8888' }
     }).done(function (msg) {
         MyLogger.info(msg);
-
-        var regExp = /Category\: ([^;]+)\;/;
-        var matches = regExp.match(msg);
-
-        $("#oterm").val(matches[matches.length-1]);
     }).error(function () {
         MyLogger.error("request failed");
     });
@@ -181,38 +165,12 @@ $( "#getservicesbutton" ).click(function() {
 });
 
 var imagesLoaded = false;
-$(function(){
-    var navMain = $("#tab_os_field");
-    navMain.click( function () {
-        if( imagesLoaded==false ) {
-            // in the beginning - else, it might get called multiple times if user is clicking here before loading
-            imagesLoaded = true;
-            $('#osimageoption')
-                .find('option')
-                .remove();
-
-            $.ajax({
-                method: "POST",
-                url: "so.php",
-                data: {action: 'getimages', token: $("#tokenid").val() }
-            }).done(function (msg) {
-                MyLogger.info(msg);
-                var imageMaster = $("#osimagemaster");
-                var imageSlave = $("#osimageslave");
-                json = JSON.parse(msg);
-                $.each(json, function(i,item) {
-                    imageMaster.append($("<option>").val(item.id).text(item.image));
-                    imageSlave.append($("<option>").val(item.id).text(item.image));
-                });
-                $('.selectpicker').selectpicker('refresh');
-            }).error(function () {
-                MyLogger.error("request failed");
-            });
-        }
-    });
-});
+var publicSSHKeysLoaded = false;
 
 for( j=0; j<100; j++ ) {
     MyLogger.info("started");
-    MyLogger.ownColor("my color", "#f00");
+    MyLogger.warn("my awesome warning");
+    MyLogger.error("my ultimate error");
+
+    MyLogger.ownColor("my color", "#ff4; background-color:#000");
 }

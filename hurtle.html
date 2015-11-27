@@ -13,8 +13,13 @@
     <script src="bootstrapselect/dist/js/bootstrap-select.js"></script>
     <script src="logging/logger.js"></script>
     <script src="js/MainTabClass.js"></script>
-
-
+    <script src="js/ServiceTabClass.js"></script>
+    <script src="js/SystemTabClass.js"></script>
+    <script src="js/OSTabClass.js"></script>
+    <script src="js/AccessTabClass.js"></script>
+    <script src="js/DistrProcTabClass.js"></script>
+    <script src="js/DeploymentTabClass.js"></script>
+    <script src="js/ClusterTabClass.js"></script>
 
 <style type="text/css">
 
@@ -46,133 +51,14 @@
     <ul class="nav nav-pills nav-stacked col-sm-2" id="navigationEntries"></ul>
 
     <div class="tab-content col-sm-4" id="navigationContent">
-        <div class="tab-pane active panel panel-info withpadding" id="tab_main">
-            <h4 class="panel-heading">Main menu</h4>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="tokenbutton">get Token</button>
-            </p>
-            <p>Token-ID
-                <input type="text" class="form-control" id="tokenid" placeholder="enter token ID">
-            </p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_service">
-            <h4 class="panel-heading">Service</h4>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="servicetypebutton">service type</button>
-            </p>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="getservicesbutton">get services</button>
-            </p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_system">
-            <h4 class="panel-heading">System preferences</h4>
-            <p>what's the cluster's name?
-                <input type="text" class="form-control" id="clustername" placeholder="enter the cluster's name">
-            </p>
-            <p># Masters
-                <input type="text" class="form-control" id="mastercount" placeholder="enter amount of master nodes">
-            </p>
-            <p># Slaves
-                <input type="text" class="form-control" id="slavecount" placeholder="enter amount of slave nodes">
-            </p>
-            <p>should a slave node be started on the master(s) as well?
-                <input type="checkbox" id="slaveonmaster" data-reverse>
-            </p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_os">
-            <h4 class="panel-heading">OS settings</h4>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="imagebutton">get OS Images</button>
-            </p>
-            <p>
-                Select an Image for the Master(s):<br>
-                <select id="osimagemaster" class="selectpicker"></select>
-            </p>
-            <p>
-                Select an Image for the Slave(s):<br>
-                <select id="osimageslave" class="selectpicker"></select>
-            </p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_access">
-            <h4 class="panel-heading">Access to the Cluster</h4>
-            <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames
-                ac turpis egestas.</p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_deployment">
-            <h4 class="panel-heading">Deployment</h4>
-            <p>OTERM
-                <input type="text" class="form-control" id="oterm" placeholder="oterm">
-            </p>
-            <p>
-                Tenant name
-                <input type="text" class="form-control" id="tenantid" placeholder="enter tenant name">
-            </p>
-            <p>
-                Number of Slaves
-                <input type="text" class="form-control" id="slavenumber" placeholder="how many slaves to deploy?">
-            </p>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="createinstancebutton">create instance</button>
-            </p>      </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_distrproc">
-            <h4 class="panel-heading">Distributed Processing</h4>
-            <p>
-                which Framework(s) should be installed?<br>
-            <table class="table">
-                <tr>
-                    <th>
-                        Framework
-                    </th>
-                    <th>
-                        install it?
-                    </th>
-                </tr>
-                <tr>
-                    <td class="vert-align">
-                        Hadoop:
-                    </td>
-                    <td class="vert-align">
-                        <input type="checkbox" class="form-control" id="frameworkselecthadoop" data-reverse />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="vert-align">
-                        Spark:
-                    </td>
-                    <td class="vert-align">
-                        <input type="checkbox" class="form-control disabled deactivated" id="frameworkselectspark" data-reverse />
-                    </td>
-                </tr>
-            </table>
-            </p>
-        </div>
-        <div class="tab-pane panel panel-info withpadding" id="tab_organisation">
-            <h4 class="panel-heading">Cluster Organisation</h4>
-            <p>
-                Cluster's Master's IP
-                <input type="text" class="form-control" id="ipnumber" value="160.85.4.">
-            </p>
-            <p>
-                Command
-                <input type="text" class="form-control" id="command">
-            </p>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="commandbutton">send command</button>
-            </p>
-            <p>
-                <button type="button" class="btn btn-default btn-block" id="statebutton">get state</button>
-            </p>
-
-        </div>
-    </div><!-- tab content -->
-    <div class="col-sm-4 container" style="height:500px; width:50%">
-      <p>
-        <pre id="masterlog" style="height:100%">
-        </pre>
-      </p>
-    </div>
 
   </div>
+      <div class="col-sm-4 container" style="height:500px; width:50%">
+          <p>
+        <pre id="masterlog" style="height:100%">
+        </pre>
+          </p>
+      </div>
 </div><!-- end of container -->
 
 

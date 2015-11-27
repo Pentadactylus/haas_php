@@ -1,0 +1,9 @@
+
+var ServiceTabClass = function( container ) {
+    this.selector = container;
+}
+
+ServiceTabClass.prototype.drawInterface = function() {
+    $(this.selector).append( "        <div class=\"tab-pane panel panel-info withpadding\" id=\"tab_service\">\n            <h4 class=\"panel-heading\">Service</h4>\n            <p>\n                <button type=\"button\" class=\"btn btn-default btn-block\" id=\"servicetypebutton\">service type</button>\n            </p>\n            <p>\n                <button type=\"button\" class=\"btn btn-default btn-block\" id=\"getservicesbutton\">get services</button>\n            </p>\n        </div>\n" );
+
+}

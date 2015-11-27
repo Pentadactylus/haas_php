@@ -7,7 +7,7 @@ var LogMessage = function( message, loglevel, logcolor ) {
 
 var Logger = function() {
     this.logMessages = new Array();
-    this.levelColors = ["#777","#55f","#ccf","#007","#fc5","#f77","#f00","#000"];
+    this.levelColors = ["#777","#55f","#ccf","#007","#fc5","#f22","#f00","#000"];
 }
 
 Logger.prototype.log = function( message, loglevel, logcolor ) {
