@@ -1,23 +1,25 @@
 <?php
 
-class Controller {
-    private static $tenant = 'mesz';
-    private static $url = 'http://localhost:8888';
-    private static $oterm = 'haas';
-    private static $username = 'ec2-user';
-    private static $idRsaPath = '/Users/puenktli/.ssh/id_rsa';
-    // this file needs to have the password (OS_PASSWORD) inserted as no
-    private static $openStackVars = '/Users/puenktli/Documents/ZHAW/CRUS/OpenStack login files/lisamesz.sh';
 
-    private static function checkContent( $contentToCheck, $alternateContent ) {
+class Controller {
+    protected static $tenant = 'mesz';
+    protected static $url = 'http://localhost:8080';
+    protected static $oterm = 'haas';
+    protected static $username = 'ec2-user';
+    protected static $idRsaPath = '/Users/puenktli/.ssh/id_rsa';
+    // this file needs to have the password (OS_PASSWORD) inserted as no
+    protected static $openStackVars = '/Users/puenktli/Documents/ZHAW/CRUS/OpenStack login files/lisamesz.sh';
+
+    protected static function checkContent( $contentToCheck, $alternateContent ) {
         return empty($contentToCheck) ? $alternateContent : $contentToCheck;
     }
 
     /*
      * obSystem issues a given command to the terminal and returns
      */
-    private static function obSystem( $command ) {
+    protected static function obSystem( $command ) {
         ob_start();
+        // redirect stderr to stdout ->." 2>&1"
         system( $command );
         $output = ob_get_contents();
         ob_end_clean();
@@ -27,7 +29,7 @@ class Controller {
     /*
      * openStackCommand executes a command of an OpenStack command line client such as heat. It ensures that the dependencies are always met by sourcing the required auth file.
      */
-    private static function openStackCommand( $command ) {
+    protected static function openStackCommand( $command ) {
         $authFile = '"'.self::$openStackVars.'"';
         $command = "/bin/bash -c 'source {$authFile} && /usr/local/bin/{$command}'";
         return self::obSystem($command);
@@ -38,16 +40,6 @@ class Controller {
         $URL = self::checkContent( $URL, self::$url );
 
         return self::obSystem("curl -v -X GET -H 'Content-type: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' $URL/-/");
-    }
-
-    public static function createInstance( $params, $KID, $TENANT="", $OTERM="", $URL="" ) {
-        $TENANT = self::checkContent( $TENANT, self::$tenant );
-        $URL = self::checkContent( $URL, self::$url );
-        $OTERM = self::checkContent( $OTERM, self::$oterm );
-        $slavecount = self::checkContent( $params['slavecount'], 0);
-
-        $retval = self::obSystem("curl -v -X POST $URL/$OTERM/ -H 'Category: '$OTERM'; scheme=\"http://schemas.cloudcomplab.ch/occi/sm#\"; class=\"kind\";' -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Tenant-Name: '$TENANT -H heads['X-OCCI-Attribute']='icclab.haas.slave.number={$slavecount}'");
-        return $retval;
     }
 
     public static function getServices( $KID, $TENANT="", $OTERM="", $URL="" ) {
@@ -76,6 +68,18 @@ class Controller {
 
     }
 
+    public static function getFlavors() {
+        $command = "nova flavor-list";
+        $flavorOutput = self::openStackCommand($command);
+        $haystack = explode ( "\n", $flavorOutput );
+        $retVal = Array();
+        for( $i=3; $i<count($haystack)-2; $i++ ) {
+            $stack = explode( "|", $haystack[$i] );
+            array_push( $retVal, Array( "id" => trim( $stack[1]), "name" => trim( $stack[2] ), "memory" => trim($stack[3]), "disk" => trim($stack[4]), "vcpu" => trim($stack[7])));
+        }
+        return json_encode( $retVal );
+    }
+
     public static function getOSImages() {
         $command = "glance image-list";
         $imageOutput = self::openStackCommand( $command );
@@ -86,6 +90,20 @@ class Controller {
             $out = trim($stack[2]);
             if( $out!="")
                 array_push( $retVal, Array( "id" => trim($stack[1]), "image" => trim($stack[2])));
+        }
+        return json_encode( $retVal );
+    }
+
+    public static function getFloatingIPs() {
+        $command = "neutron floatingip-list";
+        $floatingipOutput = self::openStackCommand( $command );
+        $haystack = explode( "\n", $floatingipOutput );
+        $retVal = Array(Array('id'=>'', 'ip'=>'create new floating IP'));
+        for( $i=3; $i<count($haystack)-2; $i++ ) {
+            $stack = explode( "|", $haystack[$i]);
+            if( preg_match("/^[\s]*$/",$stack[2]) ) {
+                array_push($retVal, Array('id' => trim($stack[1]), 'ip' => trim($stack[3])));
+            }
         }
         return json_encode( $retVal );
     }

@@ -11,10 +11,12 @@
 
     <script src="bootstrap-checkbox/js/bootstrap-checkbox.min.js"></script>
     <script src="bootstrapselect/dist/js/bootstrap-select.js"></script>
+    <script src="bootbox/bootbox.js"></script>
     <script src="logging/logger.js"></script>
     <script src="js/MainTabClass.js"></script>
     <script src="js/ServiceTabClass.js"></script>
     <script src="js/SystemTabClass.js"></script>
+    <script src="js/NetworkTabClass.js"></script>
     <script src="js/OSTabClass.js"></script>
     <script src="js/AccessTabClass.js"></script>
     <script src="js/DistrProcTabClass.js"></script>
@@ -34,6 +36,17 @@
 .table tbody>tr>td.vert-align{
     vertical-align: middle;
 }
+pre {
+    white-space: pre-wrap;       /* CSS 3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+    .invisible {
+        display: none;
+    }
 
 </style>
 
@@ -41,7 +54,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" ng-controller="haas">
   <div class="jumbotron">
     <img src="http://blog.zhaw.ch/icclab/files/2015/08/cropped-icclab_splab_combined_logo.png" style="width: 500px; float:right; ">
     <h1>Hadoop<br>as a Service</h1>
@@ -60,7 +73,7 @@
           </p>
       </div>
 </div><!-- end of container -->
-
+</div>
 
 <script src="dcaas.js"></script>
 

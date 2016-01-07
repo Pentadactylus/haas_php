@@ -2,7 +2,7 @@
 
 require_once( "controller.php" );
 
-$output = Controller::remoteSSH( $_POST['command'], $_POST['ip'] );
+$output = Controller::remoteSSH( escapeshellcmd($_POST['command']), $_POST['ip'] );
 
 if( $output=="" ) {
     echo "N/A";

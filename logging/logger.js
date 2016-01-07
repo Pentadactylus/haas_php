@@ -17,7 +17,7 @@ Logger.prototype.log = function( message, loglevel, logcolor ) {
 
     for( var i=0; i<this.logMessages.length; i++ ) {
         var logColor = (this.logMessages[i].loglevel<=Logger.OFF) ? this.levelColors[this.logMessages[i].loglevel] : this.logMessages[i].logcolor;
-        logText += "<span style='color: "+logColor+"'><b>"+this.logMessages[i].logtime.toLocaleTimeString()+"</b>: "+this.logMessages[i].message+"</span>\n";
+        logText = "<span style='color: "+logColor+"'><b>"+this.logMessages[i].logtime.toLocaleTimeString()+"</b>: "+this.logMessages[i].message+"</span>\n"+logText;
     }
 
     var textarea = $("#masterlog");

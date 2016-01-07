@@ -1,6 +1,11 @@
 <?php
 
 /*
+ *
+ * This is the proxy file which will forward the requests to the controller
+ *
+ *
+ *
 export URL="http://127.0.0.1:8888"
 export OTERM="haas"
 export KID=7381d8eb4a19407ca8b127042a670e60
@@ -21,7 +26,7 @@ curl -v -X GET -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Tenant
 curl -v -X DELETE -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Tenant-Name: '$TENANT $URL/$OTERM/$ID
  */
 
-require_once( "controller.php" );
+require_once( "SOController.php" );
 
 $action = $_POST['action'];
 $KID = $_POST['token'];
@@ -29,23 +34,42 @@ $TENANT = $_POST['tenant'];
 $URL = $_POST['url'];
 $OTERM = $_POST['oterm'];
 
+$controller = SOController;
+
 switch( $action ) {
     case 'servicetype':
-        $output = Controller::getServiceType( $KID, $TENANT, $URL );
+        $output = $controller::getServiceType( $KID, $TENANT, $URL );
         break;
     case 'createinstance':
         $params = Array();
+        // TODO: input has to be checked
         $params['slavecount'] = $_POST['slavecount'];
-        $output = Controller::createInstance( $params, $KID, $TENANT, $OTERM, $URL );
+        $output = $controller::createInstance( $params, $KID, $TENANT, $OTERM, $URL );
         break;
     case 'getservices':
-        $output = Controller::getServices( $KID, $TENANT, $OTERM, $URL );
+        $output = $controller::getServices( $KID, $TENANT, $OTERM, $URL );
         break;
     case 'getimages':
-        $output = Controller::getOSImages();
+        $output = $controller::getOSImages();
+        break;
+    case 'getfloatingips':
+        $output = $controller::getFloatingIPs();
         break;
     case 'getsshpublickeys':
-        $output = Controller::getRegisteredSSHKeys();
+        $output = $controller::getRegisteredSSHKeys();
+        break;
+    case 'getflavors':
+        $output = $controller::getFlavors();
+        break;
+    case 'gettoken':
+        $output = $controller::getToken();
+        break;
+    case 'getclusterstate':
+        $output = $controller::getClusterState($KID);
+        break;
+    case 'deletecluster':
+        // TODO: input has to be checked
+        $output = $controller::deleteCluster($_POST['ip'],$KID);
         break;
     default:
         break;

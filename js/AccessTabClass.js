@@ -4,13 +4,12 @@ var AccessTabClass = function( container ) {
 }
 
 AccessTabClass.prototype.drawInterface = function() {
-    $(this.selector).append( "<div class=\"tab-pane panel panel-info withpadding\" id=\"tab_access\"><h4 class=\"panel-heading\">Access to the Cluster</h4><p>SSH public key to be inserted (if this field is filled in, following input won't be considered)<input type=\"text\" class=\"form-control\" id=\"sshkey\" value=\"paste your SSH public key here...\"></p><p>...or select a registered SSH public key:<br><select id=\"registeredsshkeys\" class=\"selectpicker\"></select></p></div>" );
+    $(this.selector).append( "<div class=\"tab-pane panel panel-info withpadding\" id=\"tab_access\"><h4 class=\"panel-heading\">Access to the Cluster</h4><p>SSH public key to be inserted (if this field is filled in, following input won't be considered)<input type=\"text\" class=\"form-control\" id=\"sshkey\" placeholder=\"paste your SSH public key here...\"></p><p>and the new key's name:<input type=\"text\" class=\"form-control\" id=\"sshkeyname\" placeholder=\"what's the name?\"></p><p>...or select a registered SSH public key:<br><select id=\"registeredsshkeys\" class=\"selectpicker\"></select></p></div>" );
 
 }
 
-$(function(){
-    var navMain = $("#tab_access");
-    navMain.click( function () {
+AccessTabClass.prototype.isReady = function() {
+    $("#tab_access").click( function () {
         if( publicSSHKeysLoaded==false ) {
             // in the beginning - else, it might get called multiple times if user is clicking here before loading
             publicSSHKeysLoaded = true;
@@ -37,4 +36,4 @@ $(function(){
             });
         }
     });
-});
+};
