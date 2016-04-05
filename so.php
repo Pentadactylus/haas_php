@@ -27,26 +27,46 @@ curl -v -X DELETE -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Ten
  */
 
 require_once( "SOController.php" );
+require_once( "SMController.php" );
+require_once( "vendor/autoload.php" );
 
-$action = $_POST['action'];
-$KID = $_POST['token'];
-$TENANT = $_POST['tenant'];
-$URL = $_POST['url'];
-$OTERM = $_POST['oterm'];
+$inputString = file_get_contents('php://input');
 
-$controller = SOController;
+$input = Zend\Json\Json::decode( $inputString, Zend\Json\Json::TYPE_ARRAY );
 
-switch( $action ) {
+//
+//$action = $_POST['action'];
+//$KID = $_POST['token'];
+//$TENANT = $_POST['tenant'];
+//$URL = $_POST['url'];
+//$OTERM = $_POST['oterm'];
+
+$controller = SMController;
+
+
+switch( $input['action'] ) {
     case 'servicetype':
         $output = $controller::getServiceType( $KID, $TENANT, $URL );
         break;
     case 'createinstance':
-        $params = Array();
+
+        $output = "";
+
+        $parameters = Array();
+        foreach( $input as $key => $value ) {
+            if( preg_match( '/^icclab\.haas\./', $key ) ) {
+                $parameters[ $key ] = $value;
+                $output = $output."\n".$key."=".$value;
+            }
+        }
+        echo "parameters:";
+        var_dump($input);
+
         // TODO: input has to be checked
-        $params['slavecount'] = $_POST['slavecount'];
-        $output = $controller::createInstance( $params, $KID, $TENANT, $OTERM, $URL );
+        $output = $controller::createInstance( $parameters, $input['token'], $input['tenant'], $input['oterm'] );
         break;
     case 'getservices':
+        var_dump($input);
         $output = $controller::getServices( $KID, $TENANT, $OTERM, $URL );
         break;
     case 'getimages':
@@ -54,6 +74,9 @@ switch( $action ) {
         break;
     case 'getfloatingips':
         $output = $controller::getFloatingIPs();
+        break;
+    case 'getvolumes':
+        $output = $controller::getVolumes();
         break;
     case 'getsshpublickeys':
         $output = $controller::getRegisteredSSHKeys();
@@ -69,7 +92,12 @@ switch( $action ) {
         break;
     case 'deletecluster':
         // TODO: input has to be checked
-        $output = $controller::deleteCluster($_POST['ip'],$KID);
+        $output = $controller::deleteCluster($input['ip'],$input['token']);
+        break;
+    case 'sshcommand':
+        echo $input['ip'];
+        echo $input['command'];
+        $output = Controller::remoteSSH( escapeshellcmd($input['command']), $input['ip'] );
         break;
     default:
         break;

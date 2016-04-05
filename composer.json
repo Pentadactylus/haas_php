@@ -1,0 +1,8 @@
+{
+	"autoload": {
+		"zendframework/zend-json": "2.6.0"
+	},
+	"require": {
+		"rackspace/php-opencloud": "^1.16"
+	}
+}

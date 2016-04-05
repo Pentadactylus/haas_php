@@ -14,8 +14,8 @@ class SOController extends Controller
     public static function createInstance( $params, $KID, $TENANT="", $OTERM="", $URL="" ) {
         $TENANT = self::checkContent( $TENANT, self::$tenant );
         $URL = self::checkContent( $URL, self::$url );
-        $OTERM = self::checkContent( $OTERM, self::$oterm );
-        $slavecount = self::checkContent( $params['slavecount'], 0);
+//        $OTERM = self::checkContent( $OTERM, self::$oterm );
+//        $slavecount = self::checkContent( $params['slavecount'], 0);
 
 //token = '32fcaece34204f44b26dccd45228804b'
 //heads = {'X-Auth-Token':token, 'X-Tenant-Name':'mesz', 'Content-Type':'text/occi', 'Accept':'text/occi'}
@@ -27,13 +27,17 @@ class SOController extends Controller
 //heads['X-OCCI-Attribute']='icclab.haas.slave.number="1",icclab.haas.master.floatingip="false",icclab.haas.master.slaveonmaster="false",icclab.haas.master.sshkeyname="mesz MNMBA"'
 // r = requests.post(host+'/orchestrator/default?action=deploy', headers=heads); r.headers;
 
+        $requestParams = "";
+        foreach( $params as $key => $value ) {
+            $requestParams .= '"'.$key.'"="'.$value.'",';
+        }
         $command = "curl -v -X PUT {$URL}/orchestrator/default -H 'Content-type: text/occi' -H 'Accept: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' -H 'Category: orchestrator; scheme=\"http://schemas.mobile-cloud-networking.eu/occi/service#\"'";
+//        echo $command;
+        $retval = self::obSystem($command);
+        $command = "curl -v -X POST {$URL}/orchestrator/default?action=deploy -H 'Content-type: text/occi' -H 'Accept: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' -H 'Category: deploy; scheme=\"http://schemas.mobile-cloud-networking.eu/occi/service#\"' -H 'X-OCCI-Attribute: ".$requestParams."icclab.haas.rootfolder=\"/Users/puenktli/Documents/Coding/PycharmProjects/HaaS/bundle/data\"'";
         echo $command;
         $retval = self::obSystem($command);
-        $command = "curl -v -X POST {$URL}/orchestrator/default?action=deploy -H 'Content-type: text/occi' -H 'Accept: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' -H 'Category: deploy; scheme=\"http://schemas.mobile-cloud-networking.eu/occi/service#\"' -H 'X-OCCI-Attribute: icclab.haas.slave.number=1,icclab.haas.master.floatingip=\"false\",icclab.haas.master.slaveonmaster=\"false\",icclab.haas.master.sshkeyname=\"mesz MNMBA\"'";
-        echo $command;
-        $retval = self::obSystem($command);
-        return $retval;
+        return "";//$retval;
     }
 
     public static function deleteCluster($ip, $KID, $TENANT="") {
@@ -52,12 +56,6 @@ class SOController extends Controller
                 $ipid = $idsegments[1];
             }
         }
-//        if( count($haystack)>1 ) {
-//            print_r($haystack);
-//            return "Error: too many results for $ip";
-//        }
-
-//        print_r($idsegments);
 
         if( empty( $ipid ) ) {
             return "IP $ip not found";
@@ -65,18 +63,13 @@ class SOController extends Controller
 
         $command = "neutron floatingip-disassociate".$ipid;
 
-//        echo $command;
-
         self::openStackCommand($command);
-
-//        # sleep for 2 seconds so that neutron has time to disassociate the floating IP before disposal starts
-//        sleep( 2 );
 
 //        heads = {'X-Auth-Token':token, 'X-Tenant-Name':'mesz', 'Content-Type':'text/occi', 'Accept':'text/occi'}
 //        curl -v -X DELETE http://localhost:8080 -H 'Content-Type: text/occi' -H 'Accept: text/occi' -H 'X-Tenant-Name: mesz' -H 'X-Auth-Token: eafb5286fba5447fb048c06f2e34190a'
         $command = "curl -v -X DELETE ".Controller::$url." -H 'Content-type: text/occi' -H 'Accept: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT'";
 
-        return self::obSystem($command);;
+        return self::obSystem($command);
     }
 
 

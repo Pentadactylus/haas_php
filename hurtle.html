@@ -62,13 +62,13 @@ pre {
 
   <div class="container">
     <ul class="nav nav-pills nav-stacked col-sm-2" id="navigationEntries"></ul>
-
-    <div class="tab-content col-sm-4" id="navigationContent">
+      <div class="tab-content col-sm-4" id="navigationContent" style="width:80%;">
 
   </div>
-      <div class="col-sm-4 container" style="height:500px; width:50%">
+
+    <div class="col-sm-4 container" style="height:50px; width:80%; position: fixed; bottom:0px; opacity: 0.8;" id="outputbox">
           <p>
-        <pre id="masterlog" style="height:100%">
+        <pre id="masterlog" style="height:100%" onmouseover="$.OutputFloatIn()" onmouseout="$.OutputFloatOut()">
         </pre>
           </p>
       </div>

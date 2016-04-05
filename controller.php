@@ -1,14 +1,16 @@
 <?php
 
+require 'vendor/autoload.php';
 
 class Controller {
     protected static $tenant = 'mesz';
-    protected static $url = 'http://localhost:8080';
+    protected static $url = 'http://127.0.0.1:8888';
     protected static $oterm = 'haas';
-    protected static $username = 'ec2-user';
+    protected static $username = 'ubuntu';
     protected static $idRsaPath = '/Users/puenktli/.ssh/id_rsa';
     // this file needs to have the password (OS_PASSWORD) inserted as no
     protected static $openStackVars = '/Users/puenktli/Documents/ZHAW/CRUS/OpenStack login files/lisamesz.sh';
+    protected static $rootFolder = '/Users/puenktli/Documents/Coding/PycharmProjects/hurtle_sm/dataLisa';
 
     protected static function checkContent( $contentToCheck, $alternateContent ) {
         return empty($contentToCheck) ? $alternateContent : $contentToCheck;
@@ -76,6 +78,20 @@ class Controller {
         for( $i=3; $i<count($haystack)-2; $i++ ) {
             $stack = explode( "|", $haystack[$i] );
             array_push( $retVal, Array( "id" => trim( $stack[1]), "name" => trim( $stack[2] ), "memory" => trim($stack[3]), "disk" => trim($stack[4]), "vcpu" => trim($stack[7])));
+        }
+        return json_encode( $retVal );
+    }
+
+    public static function getVolumes() {
+        $command = "cinder list";
+        $volumeOutput = self::openStackCommand($command);
+        $haystack = explode ( "\n", $volumeOutput );
+        $retVal = Array();
+        for( $i=3; $i<(count($haystack)-2); $i++ ) {
+            $stack = explode( "|", $haystack[$i]);
+            $out = trim($stack[7]);
+            if( $out=="")
+                array_push( $retVal, Array( "id" => trim($stack[1]), "volume" => trim($stack[3])." (size: ".trim($stack[4])."GB)"));
         }
         return json_encode( $retVal );
     }
