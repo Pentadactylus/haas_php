@@ -28,7 +28,7 @@ class DISCOConfig {
     public static $authurl = 'http://lisa.cloudcomplab.ch:35357/v2.0';
 
     /*
-     * rootFolder is the data sm/managers/data folder on the DISCO deployment server; logFile is the path to the php log file where all commands will be logged to
+     * rootFolder is the data sm/managers/data folder on the DISCO deployment server; logFile is the path to the php log file where all commands will be logged to. Be aware: the log file will also contain the passwords! For turning logging off, just set it to an empty string.
      */
     public static $rootFolder = '/home/ubuntu/disco/sm/managers/data';
 //    public static $rootFolder = '/Users/puenktli/Documents/Coding/PycharmProjects/hurtle_sm/dataLisa';

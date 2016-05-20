@@ -60,7 +60,10 @@ class Controller {
     }
 
     public static function log( $message ) {
-        file_put_contents(Controller::getLogFile(),$message."\n", FILE_APPEND | LOCK_EX );
+        $logfile = Controller::getLogFile();
+        if( $logfile!='' ) {
+            file_put_contents($logfile, $message . "\n", FILE_APPEND | LOCK_EX);
+        }
     }
 
     /*
