@@ -2,9 +2,10 @@
 // activate special checkbox rendering for the already existing checkboxes
 $(':checkbox').checkboxpicker();
 
+// these are the entries in the left navigation which are created dynamically
 $.navigationEntries = [
-    {"href":"tab_main", "active" : "1", "id": "tab_main_field", "value" : "Main", "class" : "MainTabClass" },
-    {"href":"tab_service", "value" : "Service", "id": "tab_service_field", "class" : "ServiceTabClass" },
+    {"href":"tab_main", "active" : "1", "id": "tab_main_field", "value" : "User data", "class" : "MainTabClass" },
+    //{"href":"tab_service", "value" : "Service", "id": "tab_service_field", "class" : "ServiceTabClass" },
     {"href":"tab_system", "value" : "System", "id": "tab_system_field", "class" : "SystemTabClass" },
     {"href":"tab_network", "value" : "Network", "id" : "tab_network_field", "class" : "NetworkTabClass" },
     {"href":"tab_os", "value" : "OS", "id" : "tab_os_field", "class" : "OSTabClass" },
@@ -25,6 +26,11 @@ $.navigationEntries = [
 //      - defaultValue: the default value(s) of the specified field; this has
 //                      to be an array with the values listed in it
 $.creationVariables = [
+    {"name": "tenant"},
+    {"name": "username"},
+    {"name": "password"},
+    {"name": "region"},
+    {"name": "token"},
     {"name": "icclab.haas.cluster.name"},
     {"name": "icclab.haas.master.image"},
     {"name": "icclab.haas.slave.image"},
@@ -51,6 +57,27 @@ $.creationVariables = [
     {"name": "icclab.haas.cluster.homedir"}
 ];
 
+// The following variables have to be included into every request
+$.compulsoryVariables = [
+    {"name": "username" },
+    {"name": "password" },
+    {"name": "tenant" },
+    {"name": "region" }
+]
+
+$.GetCompulsoryVariables = function() {
+    var requestData = {};
+    $.each($.compulsoryVariables, function (i, item) {
+        var value;
+        requestData[item.name] = $("#"+item.name).val();
+        if( requestData[item.name]=='' ) {
+            alert('value '+item.name+' not set');
+            throw Exception('value '+item.name+' not set');
+        }
+    });
+    return requestData;
+}
+
 $.AjaxRequest = function( reqdata, reqsuccess, reqerror ) {
     // check if data is JSON - if not, convert it to JSON
     try {
@@ -60,7 +87,9 @@ $.AjaxRequest = function( reqdata, reqsuccess, reqerror ) {
         reqdata = JSON.stringify(reqdata);
     }
 
-    // send the request
+    //MyLogger.debug(reqdata);
+
+    // send the request and call given success / error functions
     $.ajax({
         method: "POST",
         url: "so.php",
@@ -76,7 +105,7 @@ $.AjaxRequest = function( reqdata, reqsuccess, reqerror ) {
         }
     }).error(function() {
         if (reqerror === undefined) {
-            MyLogger.error("request failed");
+            MyLogger.error("request "+reqdata+" failed");
         }
         else {
             reqerror();
@@ -152,7 +181,6 @@ $(document).ready( function() {
     $(':checkbox').checkboxpicker();
 
 });
-
 
 
 var running = 0;

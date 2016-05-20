@@ -10,9 +10,9 @@ NetworkTabClass.prototype.drawInterface = function() {
         "<p>Gateway IP:<input type='text' class='form-control' id='icclab.haas.network.gw.ip' placeholder='192.168.19.1'></p>" +
         "<p>Allocation pool start:<input type='text' class='form-control' id='icclab.haas.network.subnet.allocpool.start' placeholder='192.168.19.2'></p>" +
         "<p>Allocation pool end:<input type='text' class='form-control' id='icclab.haas.network.subnet.allocpool.end' placeholder='192.168.19.254'></p>" +
-        "<p>DNS servers:<input type='text' class='form-control' id='icclab.haas.network.dnsservers' placeholder='['64.6.64.6','64.6.65.6']'></p>" +
-        "<p>should a floating IP automatically be assigned to the master?<input type='checkbox' id='icclab.haas.master.withfloatingip' data-reverse checked></p>" +
-        "<p id='floatingipidlist'>Please choose a floating IP from the list:<br><select id='icclab.haas.master.attachfloatingipwithid' class='selectpicker'></select></p>" +
+        "<p>DNS servers:<input type='text' class='form-control' id='icclab.haas.network.dnsservers' placeholder=\"['8.8.8.8','8.8.4.4']\"></p>" +
+        "<p>should a floating IP automatically be assigned to the master?<input type='checkbox' value='true' id='icclab.haas.master.withfloatingip' data-reverse checked></p>" +
+        "<!--<p id='floatingipidlist'>Please choose a floating IP from the list:<br><select id='icclab.haas.master.attachfloatingipwithid' class='selectpicker'></select></p>-->" +
         "</div>" );
 
 }
@@ -20,7 +20,7 @@ NetworkTabClass.prototype.drawInterface = function() {
 var floatingIpsLoaded = false;
 
 NetworkTabClass.prototype.isReady = function() {
-    $("#tab_network_field").click( function () {
+/*    $("#tab_network_field").click( function () {
         if( floatingIpsLoaded==false ) {
             // in the beginning - else, there might be unexpected behaviour
             floatingIpsLoaded = true;
@@ -39,7 +39,10 @@ NetworkTabClass.prototype.isReady = function() {
                 .find('option')
                 .remove();
 
-            $.AjaxRequest({action: 'getfloatingips', token: $("#tokenid").val() },function (msg) {
+            var requestData = $.GetCompulsoryVariables();
+
+            requestData['action'] = 'getfloatingips';
+            $.AjaxRequest(JSON.stringify(requestData),function (msg) {
                 MyLogger.info(msg);
                 var floatingIpList = $("#icclab\\.haas\\.master\\.attachfloatingipwithid");
                 json = JSON.parse(msg);
@@ -64,4 +67,5 @@ NetworkTabClass.prototype.isReady = function() {
             floatingIpList.selectpicker('refresh'); // has to be refreshed manually
         }
     });
+    */
 };

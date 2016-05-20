@@ -12,15 +12,14 @@ OSTabClass.prototype.drawInterface = function() {
         "<select id='icclab.haas.master.flavor' class='selectpicker'></select></p>" +
         "<p>Select an Image for the Slave(s):<br><select id='icclab.haas.slave.image' class='selectpicker'></select></p>" +
         "<p>...plus a flavor:<br><select id='icclab.haas.slave.flavor' class='selectpicker'></select></p>" +
-        "<p>What's the existing username?<input type='text' class='form-control' id='icclab.haas.cluster.username' placeholder='ec2-user'></p>" +
-        "<p>what's the user's group name?<input type='text' class='form-control' id='icclab.haas.cluster.usergroup' placeholder='ec2-user'></p>" +
-        "<p>what's the user's home directory?<input type='text' class='form-control' id='icclab.haas.cluster.homedir' placeholder='/home/ec2-user'></p>" +
+        "<p>What's the existing username?<input type='text' class='form-control' id='icclab.haas.cluster.username' placeholder='ubuntu'></p>" +
+        "<p>what's the user's group name?<input type='text' class='form-control' id='icclab.haas.cluster.usergroup' placeholder='ubuntu'></p>" +
+        "<p>what's the user's home directory?<input type='text' class='form-control' id='icclab.haas.cluster.homedir' placeholder='/home/ubuntu'></p>" +
         "</div>" );
 
 }
 
 var imagesLoaded = false;
-
 
 OSTabClass.prototype.isReady = function() {
     if(imagesLoaded==false) {
@@ -28,7 +27,10 @@ OSTabClass.prototype.isReady = function() {
 
         $("#tab_os_field").click(function () {
 
-            $.AjaxRequest({action: 'getimages', token: $("#tokenid").val()}, function (msg) {
+            var requestData = $.GetCompulsoryVariables();
+
+            requestData['action'] = 'getimages';
+            $.AjaxRequest(JSON.stringify(requestData), function (msg) {
                 MyLogger.info(msg);
                 var imageMaster = $("#icclab\\.haas\\.master\\.image");
                 var imageSlave = $("#icclab\\.haas\\.slave\\.image");
@@ -43,7 +45,8 @@ OSTabClass.prototype.isReady = function() {
                 imageSlave.selectpicker('refresh');
             });
 
-            $.AjaxRequest({action: 'getflavors', token: $("#tokenid").val()}, function (msg) {
+            requestData['action'] = 'getflavors';
+            $.AjaxRequest(JSON.stringify(requestData), function (msg) {
                 MyLogger.info(msg);
                 var flavourMaster = $("#icclab\\.haas\\.master\\.flavor");
                 var flavourSlave = $("#icclab\\.haas\\.slave\\.flavor");
@@ -54,9 +57,18 @@ OSTabClass.prototype.isReady = function() {
                     flavourMaster.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
                     flavourSlave.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
                 });
-                $('#flavormaster').selectpicker('refresh');
-                $('#flavorslave').selectpicker('refresh');
+                flavourMaster.selectpicker('refresh');
+                flavourSlave.selectpicker('refresh');
             });
+        });
+
+        // doesn't work - fix it
+        // probably because the values are loaded dynamically
+        $("#icclab\\.haas\\.master\\.image").change(function() {
+            if($("#icclab\\.haas\\.slave\\.image").val()=="") {
+                value = $("#icclab\\.haas\\.master\\.image").val()
+                $("#icclab\\.haas\\.slave\\.image").val(value);
+            }
         });
     }
 };

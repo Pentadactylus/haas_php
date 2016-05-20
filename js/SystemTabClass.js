@@ -13,7 +13,7 @@ SystemTabClass.prototype.drawInterface = function() {
         "<p># Slaves<input type='text' class='form-control' id='icclab.haas.slave.number' placeholder='enter amount of slave nodes'></p>" +
         "<p>should a slave node be started on the master(s) as well?<input type='checkbox' id='icclab.haas.master.slaveonmaster' data-reverse></p>" +
         "<p>Which volume contains the software to be installed?<br>" +
-        "<select id='icclab.haas.master.imageid' class='selectpicker'></select></p>" +
+        "<!--<select id='icclab.haas.master.imageid' class='selectpicker'></select></p>-->" +
         "</div>" );
 
 }
@@ -21,10 +21,23 @@ SystemTabClass.prototype.drawInterface = function() {
 var softwareVolumesLoaded = false;
 
 SystemTabClass.prototype.isReady = function() {
+
+    /*
     if( softwareVolumesLoaded==false ) {
         softwareVolumesLoaded = true;
         $("#tab_system_field").click(function () {
-            $.AjaxRequest({action: 'getvolumes', token: $("#tokenid").val()}, function (msg) {
+            var requestData = {};
+            $.each($.compulsoryVariables, function (i, item) {
+                var value;
+                requestData[item.name] = $("#"+item.name).val();
+                if( requestData[item.name]=='' ) {
+                    alert('value '+item.name+' not set');
+                    throw Exception('value '+item.name+' not set');
+                }
+            });
+
+            requestData['action'] = 'getvolumes';
+            $.AjaxRequest(JSON.stringify(requestData), function (msg) {
                 MyLogger.info(msg);
                 var softwareVolumes = $("#icclab\\.haas\\.master\\.imageid");
                 json = JSON.parse(msg);
@@ -36,4 +49,5 @@ SystemTabClass.prototype.isReady = function() {
             });
         });
     }
+    */
 };

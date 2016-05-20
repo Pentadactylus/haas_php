@@ -26,66 +26,80 @@ curl -v -X GET -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Tenant
 curl -v -X DELETE -H 'Content-type: text/occi' -H 'X-Auth-Token: '$KID -H 'X-Tenant-Name: '$TENANT $URL/$OTERM/$ID
  */
 
-require_once( "SOController.php" );
-require_once( "SMController.php" );
+require_once("php/Controller.php");
 require_once( "vendor/autoload.php" );
 
 $inputString = file_get_contents('php://input');
 
+Controller::log("inputstring: ".$inputString);
+
+Zend\Json\Json::$useBuiltinEncoderDecoder = true;
 $input = Zend\Json\Json::decode( $inputString, Zend\Json\Json::TYPE_ARRAY );
+Controller::log("inputtype:".gettype($input));
+Controller::log($input);
 
-//
-//$action = $_POST['action'];
-//$KID = $_POST['token'];
-//$TENANT = $_POST['tenant'];
-//$URL = $_POST['url'];
-//$OTERM = $_POST['oterm'];
 
-$controller = SMController;
+$controller = Controller;
 
+//$output = "";
+
+$parameters = Array();
+foreach( $input as $key => $value ) {
+    if( preg_match( '/^\b(username|password|region|token|tenant|icclab\.haas\.)\b/', $key ) ) {
+        $parameters[ $key ] = $value;
+//        $output = $output."\n".$key."=".$value;
+    }
+}
 
 switch( $input['action'] ) {
-    case 'servicetype':
-        $output = $controller::getServiceType( $KID, $TENANT, $URL );
-        break;
-    case 'createinstance':
-
-        $output = "";
-
-        $parameters = Array();
-        foreach( $input as $key => $value ) {
-            if( preg_match( '/^icclab\.haas\./', $key ) ) {
-                $parameters[ $key ] = $value;
-                $output = $output."\n".$key."=".$value;
-            }
+    case 'authenticate':
+        $output = $controller::authenticate( $input );
+        if( $output==false ) {
+            $output = 'false';
         }
-        echo "parameters:";
-        var_dump($input);
+        else {
+            $output = 'true';
+        }
+        break;
+//    case 'servicetype1
+    case 'createinstance':
+        Controller::log("createinstance");
+
+
+//        $output = "";
+//
+//        $parameters = Array();
+//        foreach( $input as $key => $value ) {
+//            if( preg_match( '/^\b(username|password|region|token|tenant|icclab\.haas\.)\b/', $key ) ) {
+//                $parameters[ $key ] = $value;
+//                $output = $output."\n".$key."=".$value;
+//            }
+//        }
+
+//        echo "parameters:";
+//        var_dump($input);
 
         // TODO: input has to be checked
-        $output = $controller::createInstance( $parameters, $input['token'], $input['tenant'], $input['oterm'] );
+        $output = $controller::createInstance( $parameters );
         break;
-    case 'getservices':
-        var_dump($input);
-        $output = $controller::getServices( $KID, $TENANT, $OTERM, $URL );
-        break;
+//    case 'getservices':
+//        var_dump($input);
+//        $output = $controller::getServices( $KID, $TENANT, $OTERM, $URL );
+//        break;
     case 'getimages':
-        $output = $controller::getOSImages();
+        $output = $controller::getOSImages( $parameters );
         break;
-    case 'getfloatingips':
-        $output = $controller::getFloatingIPs();
-        break;
-    case 'getvolumes':
-        $output = $controller::getVolumes();
-        break;
+//    case 'getfloatingips':
+//        $output = $controller::getFloatingIPs( $parameters );
+//        break;
+//    case 'getvolumes':
+//        $output = $controller::getVolumes( $parameters );
+//        break;
     case 'getsshpublickeys':
-        $output = $controller::getRegisteredSSHKeys();
+        $output = $controller::getRegisteredSSHKeys( $parameters );
         break;
     case 'getflavors':
-        $output = $controller::getFlavors();
-        break;
-    case 'gettoken':
-        $output = $controller::getToken();
+        $output = $controller::getFlavors( $parameters );
         break;
     case 'getclusterstate':
         $output = $controller::getClusterState($KID);
@@ -111,4 +125,3 @@ else {
 }
 
 ?>
-

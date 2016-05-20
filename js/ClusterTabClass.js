@@ -11,7 +11,7 @@ ClusterTabClass.prototype.drawInterface = function() {
         "<span class='input-group-btn'><button type='button' class='btn btn-default' id='commandbutton'>send command</button></span></div>" +
         "<p><button type='button' class='btn btn-default btn-block' id='deploymentstatebutton'>get state</button></p>" +
         "<p><button type='button' class='btn btn-default btn-block' id='clusterstatebutton'>get Cluster state</button></p>" +
-        "<p><button type='button' class='btn btn-default btn-block' id='deleteclusterbutton'>delete this Cluster</button></p>" +
+        "<!--<p><button type='button' class='btn btn-default btn-block' id='deleteclusterbutton'>delete this Cluster</button></p>-->" +
         "</div>" );
 
 }
@@ -27,7 +27,7 @@ ClusterTabClass.prototype.isReady = function() {
             $("#deploymentstatebutton").addClass("btn-danger");
             running = 1;
             refreshId = setInterval(function () {
-                $.AjaxRequest({action: 'sshcommand', command: "cat /home/ec2-user/deployment.log", ip: $("#ipnumber").val()});
+                $.AjaxRequest({action: 'sshcommand', command: "cat /home/ubuntu/deployment.log", ip: $("#ipnumber").val()});
             }, 1000);
         }
         else {
