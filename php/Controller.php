@@ -117,13 +117,10 @@ class Controller {
      * getFlavors() returns all available flavours on OpenStack as a JSON string
      * $parameters has to contain username, password and tenant
      */
-    public static function getFlavors($parameters) {
+    public static function getFlavors($input) {
         $authurl = Controller::getAuthUrl();
-        $username = $parameters['username'];
-        $password = $parameters['password'];
-        $tenant = $parameters['tenant'];
         $nova = self::getNova();
-        $command = "{$nova} --os-username '{$username}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' --os-password '{$password}' flavor-list";
+        $command = "{$nova} --os-username '{$input['username']}' --os-tenant-name '{$input['tenant']}' --os-auth-url '{$authurl}' --os-password '{$input['password']}' --os-region-name '{$input['region']}' flavor-list";
         $flavorOutput = self::obSystem($command);
         Controller::log($command);
         $haystack = explode ( "\n", $flavorOutput );
@@ -136,31 +133,13 @@ class Controller {
         return json_encode( $retVal );
     }
 
-//    public static function getVolumes($username,$password,$tenant) {
-//        $authurl = Controller::getAuthUrl();
-//        $command = "/usr/local/bin/cinder --os-username=\"{$username}\" --os-password=\"{$password}\" --os-tenant-name=\"{$tenant}\" --os-auth-url=\"{$authurl}\" list";
-//        $volumeOutput = self::obSystem($command);
-//        $haystack = explode ( "\n", $volumeOutput );
-//        $retVal = Array();
-//        for( $i=3; $i<(count($haystack)-2); $i++ ) {
-//            $stack = explode( "|", $haystack[$i]);
-//            $out = trim($stack[7]);
-//            if( $out=="")
-//                array_push( $retVal, Array( "id" => trim($stack[1]), "volume" => trim($stack[3])." (size: ".trim($stack[4])."GB)"));
-//        }
-//        return json_encode( $retVal );
-//    }
-
     /*
      * getOSImages() returns all images on OpenStack which can be used as OS of a VM
      */
-    public static function getOSImages($parameters) {
+    public static function getOSImages($input) {
         $authurl = Controller::getAuthUrl();
-        $username = $parameters['username'];
-        $password = $parameters['password'];
-        $tenant = $parameters['tenant'];
         $glance = self::getGlance();
-        $command = "{$glance} --os-username '{$username}' --os-password '{$password}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' image-list";
+        $command = "{$glance} --os-username '{$input['username']}' --os-password '{$input['password']}' --os-tenant-name '{$input['tenant']}' --os-auth-url '{$authurl}' --os-region-name '{$input['region']}' image-list";
         Controller::log($command);
         $imageOutput = self::obSystem( $command );
         $haystack = explode( "\n", $imageOutput );
@@ -178,14 +157,11 @@ class Controller {
      * getRegisteredSSHKeys will return all registered SSH keys from OpenStack
      * $parameters has to contain username, password and tenant entries
      */
-    public static function getRegisteredSSHKeys($parameters) {
+    public static function getRegisteredSSHKeys($input) {
         $authurl = Controller::getAuthUrl();
-        $username = $parameters['username'];
-        $password = $parameters['password'];
-        $tenant = $parameters['tenant'];
         $nova = Controller::getNova();
 
-        $command = "{$nova} --os-username '{$username}' --os-password '{$password}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' keypair-list";
+        $command = "{$nova} --os-username '{$input['username']}' --os-password '{$input['password']}' --os-tenant-name '{$input['tenant']}' --os-auth-url '{$authurl}' --os-region-name '{$input['region']}' keypair-list";
         Controller::log($command);
         $keypairOutput = self::obSystem( $command );
         $haystack = explode( "\n", $keypairOutput );
