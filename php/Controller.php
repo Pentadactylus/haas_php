@@ -123,7 +123,7 @@ class Controller {
         $password = $parameters['password'];
         $tenant = $parameters['tenant'];
         $nova = self::getNova();
-        $command = "{$nova} --os-username '{$username}' --os-project-name '{$tenant}' --os-auth-url '{$authurl}' --os-password '{$password}' flavor-list";
+        $command = "{$nova} --os-username '{$username}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' --os-password '{$password}' flavor-list";
         $flavorOutput = self::obSystem($command);
         Controller::log($command);
         $haystack = explode ( "\n", $flavorOutput );
