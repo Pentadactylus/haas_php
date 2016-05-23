@@ -31,6 +31,10 @@ class Controller {
         return DISCOConfig::$neutron;
     }
 
+    protected static function getGlance() {
+        return DISCOConfig::$glance;
+    }
+
     protected static function getUrl() {
         return DISCOConfig::$url;
     }
@@ -87,7 +91,7 @@ class Controller {
         $authURL = Controller::getAuthUrl();
         $keystone = self::getKeystone();
 
-        $command = "{$keystone} --os-auth-url \"{$authURL}\" --os-region-name \"{$input['region']}\" --os-tenant-name \"{$input['tenant']}\" --os-password \"{$input['password']}\" --os-username \"{$input['username']}\" token-get";
+        $command = "{$keystone} --os-auth-url '{$authURL}' --os-region-name '{$input['region']}' --os-tenant-name '{$input['tenant']}' --os-password '{$input['password']}' --os-username '{$input['username']}' token-get";
         Controller::log($command);
         $output = self::obSystem($command);
         Controller::log($output);
@@ -96,22 +100,6 @@ class Controller {
         }
         return false;
     }
-
-//    public static function getServiceType( $KID, $TENANT="", $URL="" ) {
-//        $TENANT = self::checkContent( $TENANT, self::$tenant );
-//        $URL = self::checkContent( $URL, self::$url );
-//
-//        return self::obSystem("curl -v -X GET -H 'Content-type: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' $URL/-/");
-//    }
-
-//    public static function getServices( $KID, $TENANT="" ) {
-//        $TENANT = self::checkContent( $TENANT, self::$tenant );
-//        $url = self::$url;
-//        $service = self::getService();
-//
-//        $retval = self::obSystem("curl -v -X GET -H 'Content-type: text/occi' -H 'X-Auth-Token: $KID' -H 'X-Tenant-Name: $TENANT' {$url}/{$service}/");
-//        return $retval;
-//    }
 
     public static function remoteSSH( $command, $ip, $user="", $idRsaPath="" ) {
         $user = self::checkContent( $user, self::$username );
@@ -135,7 +123,7 @@ class Controller {
         $password = $parameters['password'];
         $tenant = $parameters['tenant'];
         $nova = self::getNova();
-        $command = "{$nova} --os-username=\"{$username}\" --os-project-name=\"{$tenant}\" --os-auth-url=\"{$authurl}\" --os-password=\"{$password}\" flavor-list";
+        $command = "{$nova} --os-username '{$username}' --os-project-name '{$tenant}' --os-auth-url '{$authurl}' --os-password '{$password}' flavor-list";
         $flavorOutput = self::obSystem($command);
         Controller::log($command);
         $haystack = explode ( "\n", $flavorOutput );
@@ -171,7 +159,9 @@ class Controller {
         $username = $parameters['username'];
         $password = $parameters['password'];
         $tenant = $parameters['tenant'];
-        $command = "/usr/local/bin/glance --os-username=\"{$username}\" --os-password=\"{$password}\" --os-tenant-name=\"{$tenant}\" --os-auth-url=\"{$authurl}\" image-list";
+        $glance = self::getGlance();
+        $command = "{$glance} --os-username '{$username}' --os-password '{$password}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' image-list";
+        Controller::log($command);
         $imageOutput = self::obSystem( $command );
         $haystack = explode( "\n", $imageOutput );
         $retVal = Array();
@@ -184,25 +174,6 @@ class Controller {
         return json_encode( $retVal );
     }
 
-//    public static function getFloatingIPs($parameters) {
-//        $authurl = Controller::getAuthUrl();
-//        $username = $parameters['username'];
-//        $password = $parameters['password'];
-//        $tenant = $parameters['tenant'];
-//        $neutron = Controller::getNoutron();
-//        $command = "{$neutron} --os-username=\"{$username}\" --os-password=\"{$password}\" --os-tenant-name=\"{$tenant}\" --os-auth-url=\"{$authurl}\" floatingip-list";
-//        $floatingipOutput = self::obSystem( $command );
-//        $haystack = explode( "\n", $floatingipOutput );
-//        $retVal = Array(Array('id'=>'', 'ip'=>'create new floating IP'));
-//        for( $i=3; $i<count($haystack)-2; $i++ ) {
-//            $stack = explode( "|", $haystack[$i]);
-//            if( preg_match("/^[\s]*$/",$stack[2]) ) {
-//                array_push($retVal, Array('id' => trim($stack[1]), 'ip' => trim($stack[3])));
-//            }
-//        }
-//        return json_encode( $retVal );
-//    }
-
     /*
      * getRegisteredSSHKeys will return all registered SSH keys from OpenStack
      * $parameters has to contain username, password and tenant entries
@@ -214,7 +185,8 @@ class Controller {
         $tenant = $parameters['tenant'];
         $nova = Controller::getNova();
 
-        $command = "{$nova} --os-username=\"{$username}\" --os-password=\"{$password}\" --os-tenant-name=\"{$tenant}\" --os-auth-url=\"{$authurl}\" keypair-list";
+        $command = "{$nova} --os-username '{$username}' --os-password '{$password}' --os-tenant-name '{$tenant}' --os-auth-url '{$authurl}' keypair-list";
+        Controller::log($command);
         $keypairOutput = self::obSystem( $command );
         $haystack = explode( "\n", $keypairOutput );
         $retVal = Array();

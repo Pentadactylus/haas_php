@@ -8,11 +8,12 @@
 
 class DISCOConfig {
     /*
-     * the path for keystone, nova and neutron have to be provided
+     * the path for keystone, nova, neutron and glance have to be provided
      */
     public static $keystone = '/usr/local/bin/keystone';
     public static $nova = '/usr/local/bin/nova';
     public static $neutron = '/usr/local/bin/neutron';
+    public static $glance = '/usr/local/bin/glance';
 
     /*
      * so to curl and ssh
