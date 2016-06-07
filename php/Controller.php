@@ -219,6 +219,86 @@ class Controller {
 
         return Zend\Json\Json::encode($retval);
     }
+
+    public static function getInstances( $params ) {
+
+        $rootFolder = self::getRootFolder();
+
+        $url = self::getUrl();
+        $service = self::getService();
+
+        $username = $params['username'];
+        $password = $params['password'];
+        $tenant = $params['tenant'];
+        $region = $params ['region'];
+        $curl = self::getCurl();
+
+        $command = "{$curl} -v -X GET {$url}/{$service}/ -H \"Accept: text/occi\" -H 'X-Tenant-Name: {$tenant}' -H 'X-Password: {$password}' -H 'X-Region-Name: {$region}' -H 'X-User-Name: {$username}' 2>&1";
+
+        Controller::log($command);
+
+        $result = self::obSystem($command);
+
+        $matches = Array();
+
+        $pattern = "#X-OCCI-Location: .*#";
+
+        preg_match ( $pattern , $result , $matches);
+
+        $reqline = $matches[0];
+
+        $pattern = "#http://[^ ,\r\n]*#";
+        preg_match_all( $pattern, $reqline, $matches);
+
+        return Zend\Json\Json::encode($matches);
+    }
+
+    public static function getClusterInfo( $params ) {
+
+        $rootFolder = self::getRootFolder();
+
+        $url = self::getUrl();
+        $service = self::getService();
+
+        $username = $params['username'];
+        $password = $params['password'];
+        $tenant = $params['tenant'];
+        $region = $params ['region'];
+        $curl = self::getCurl();
+
+        $clusterUrl = $params['clusterurl'];
+
+        $command = "{$curl} -v -X GET {$clusterUrl} -H \"Accept: text/occi\" -H 'X-Tenant-Name: {$tenant}' -H 'X-Password: {$password}' -H 'X-Region-Name: {$region}' -H 'X-User-Name: {$username}' 2>&1";
+
+        Controller::log($command);
+
+        $result = self::obSystem($command);
+
+        $matches = Array();
+
+        $pattern = "#X-OCCI-Attribute: (.*)#";
+
+        preg_match ( $pattern , $result , $matches);
+
+        $reqline = $matches[1];
+
+        $pattern = "#http://[^ ,\r\n]*#";
+        preg_match_all( $pattern, $reqline, $matches);
+
+        $pattern = "#([^,\s]*)=\"(.*)\"#U";
+
+        preg_match_all ( $pattern , $reqline , $matches);
+
+        $res = Array();
+
+        for( $i=0; $i<count($matches[1]); $i++ ) {
+            $res[$matches[1][$i]] = $matches[2][$i];
+        }
+
+//        Controller::log($reqline);
+
+        return Zend\Json\Json::encode($res);
+    }
 }
 
 ?>

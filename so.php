@@ -45,7 +45,7 @@ $controller = Controller;
 
 $parameters = Array();
 foreach( $input as $key => $value ) {
-    if( preg_match( '/^\b(username|password|region|token|tenant|icclab\.haas\.)\b/', $key ) ) {
+    if( preg_match( '/^\b(username|password|region|token|tenant|clusterurl|icclab\.haas\.)\b/', $key ) ) {
         $parameters[ $key ] = $value;
 //        $output = $output."\n".$key."=".$value;
     }
@@ -107,6 +107,12 @@ switch( $input['action'] ) {
     case 'deletecluster':
         // TODO: input has to be checked
         $output = $controller::deleteCluster($input['ip'],$input['token']);
+        break;
+    case 'getinstances':
+        $output = $controller::getInstances( $parameters );
+        break;
+    case 'getclusterinfo':
+        $output = $controller::getClusterInfo( $parameters );
         break;
     case 'sshcommand':
         echo $input['ip'];
