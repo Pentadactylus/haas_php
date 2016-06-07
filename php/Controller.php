@@ -299,6 +299,30 @@ class Controller {
 
         return Zend\Json\Json::encode($res);
     }
+
+    public static function deleteCluster( $params ) {
+
+        $service = self::getService();
+
+        $username = $params['username'];
+        $password = $params['password'];
+        $tenant = $params['tenant'];
+        $region = $params ['region'];
+        $curl = self::getCurl();
+
+        $clusterUrl = $params['clusterurl'];
+
+        $command = "{$curl} -v -X DELETE {$clusterUrl} -H 'Category: {$service}; scheme=\"http://schemas.cloudcomplab.ch/occi/sm#\"; class=\"kind\";' -H \"Accept: text/occi\" -H 'X-Tenant-Name: {$tenant}' -H 'X-Password: {$password}' -H 'X-Region-Name: {$region}' -H 'X-User-Name: {$username}' 2>&1";
+
+        Controller::log($command);
+
+        $result = self::obSystem($command);
+
+
+        Controller::log($result);
+
+        return Zend\Json\Json::encode($result);
+    }
 }
 
 ?>

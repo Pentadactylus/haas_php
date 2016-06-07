@@ -105,8 +105,7 @@ switch( $input['action'] ) {
         $output = $controller::getClusterState($KID);
         break;
     case 'deletecluster':
-        // TODO: input has to be checked
-        $output = $controller::deleteCluster($input['ip'],$input['token']);
+        $output = $controller::deleteCluster( $parameters );
         break;
     case 'getinstances':
         $output = $controller::getInstances( $parameters );
