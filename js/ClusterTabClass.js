@@ -6,15 +6,176 @@ var ClusterTabClass = function( container ) {
 ClusterTabClass.prototype.drawInterface = function() {
     $(this.selector).append( "<div class='tab-pane panel panel-info withpadding' id='tab_organisation'>" +
         "<h4 class='panel-heading'>Cluster Organisation</h4>" +
-        "<p>Cluster's Master's IP<input type='text' class='form-control col-lg-6' id='ipnumber' value='160.85.4.'></p>" +
-        "Command<div class='input-group'><input type='text' class='form-control' id='command'>" +
-        "<span class='input-group-btn'><button type='button' class='btn btn-default' id='commandbutton'>send command</button></span></div>" +
-        "<p><button type='button' class='btn btn-default btn-block' id='deploymentstatebutton'>get state</button></p>" +
-        "<p><button type='button' class='btn btn-default btn-block' id='clusterstatebutton'>get Cluster state</button></p>" +
-        "<!--<p><button type='button' class='btn btn-default btn-block' id='deleteclusterbutton'>delete this Cluster</button></p>-->" +
-        "</div>" );
+
+        '<div class="list-group" id="clusterlist"></div>'+
+        "</div>" +
+
+    '<div id="clusterModal" class="modal fade" role="dialog">\
+        <div class="modal-dialog">\
+\
+    <div class="modal-content">\
+        <div class="modal-header">\
+        <button type="button" class="close" data-dismiss="modal">&times;</button>\
+    <h4 class="modal-title">Cluster x</h4>\
+    </div>\
+    <div class="modal-body">\
+        <p>State: <span id="clusterstatus"></span></p>\
+        <p>Status text: <span id="clusterstatustext"></span></p>\
+        <p>IP address: <span id="masterip"></span></p>\
+        <button type="button" class="btn btn-info" id="recreateclusterbutton">Re-create same cluster</button>\
+    <button type="button" class="btn btn-success" id="newclusterbutton">New cluster with same specifics</button>\
+    <button type="button" class="btn btn-danger" id="deleteclusterbutton">Delete cluster</button>\
+    </div>\
+    <div class="modal-footer">\
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>\
+        </div>\
+        </div>\
+\
+        </div>\
+        </div>'
+
+
+    );
 
 }
+
+var ClusterListItemSchedulingElement = function( item, intervalRate ) {
+    this.intervalRate = intervalRate;
+    this.currentValue = intervalRate;
+    this.item = item;
+    this.loaded = false;
+    this.clusterID = false;
+    this.contentJSONObject = false;
+}
+
+ClusterListItemSchedulingElement.prototype.getIntervalRate = function() {
+    return 60;
+}
+
+ClusterListItemSchedulingElement.prototype.loadContent = function() {
+    var valueSpecificProps = {
+        "CREATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#ccccff" },
+        "UPDATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#ccccff" },
+        "CREATE_COMPLETE": { reloadTime: 20, backgroundColor: "#aaffaa" },
+        "CREATE_FAILED": { reloadTime: 60, backgroundColor: "#ffcccc" },
+        "default": { reloadTime: 60, backgroundColor: "#eeeeee" }
+    };
+
+    var request = $.GetCompulsoryVariables();
+    request['action'] = 'getclusterinfo';
+    request['clusterurl'] = this.item;
+
+    var self = this;
+
+    $.AjaxRequest(request, function (msg) {
+        //var curScheduler = new ClusterListScheduler();
+        cluster = $.parseJSON(msg);
+        self.contentJSONObject = cluster;
+        self.loaded = true;
+        var curReloadTime = valueSpecificProps["default"].reloadTime;
+        var curBackgroundColor = valueSpecificProps["default"].backgroundColor;
+        if( cluster.stack_status ) {
+            curReloadTime = valueSpecificProps[cluster.stack_status].reloadTime;
+            curBackgroundColor = valueSpecificProps[cluster.stack_status].backgroundColor;
+        }
+        window.setTimeout(function() {
+            self.loadContent();
+        }, curReloadTime);
+        $("#"+self.clusterID+"_link").css("background",curBackgroundColor);
+        console.log(cluster.stack_status);
+        console.log(cluster);
+    });
+}
+
+/*
+ * this is the default implementation of equals - it can be more complex in the
+ * inherited classes
+ */
+ClusterListItemSchedulingElement.prototype.equals = function( element ) {
+    if( element.item==this.item ) {
+        return true;
+    }
+    return false;
+}
+
+var ClusterListScheduler = function() {
+    this.elements = new Array();
+    this.action = "test";
+}
+
+ClusterListScheduler.prototype.containsElement = function( element ) {
+    for( var i=0; i<this.elements.length; i++ ) {
+        if( this.elements[i].equals( element ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ *  adds a given element to the scheduled queue
+ *  return  true    element has been successfully added
+ *  return  false   element was already within the queue so no addition
+ */
+ClusterListScheduler.prototype.addElement = function( element ) {
+    var inserted = false;
+    if( !this.containsElement( element ) ) {
+        element.loadContent();
+        this.elements.push( element );
+        inserted = true;
+    }
+
+    if( inserted ) {
+        var clusterID = element.item.replace(/.*haas\/(.*)/g,"$1");
+        element.clusterID = clusterID;
+        console.log("clusterid = "+clusterID );
+        $('#clusterlist').append('<a href="#" class="list-group-item" onclick="$.clusterListClick(\''+element.clusterID+'\')" id="'+clusterID+'_link">' +
+            '<h4 class="list-group-item-heading" id="'+clusterID+'_header">' +
+            'Distributed Computing Cluster' +
+            '</h4>' +
+            '<p class="list-group-item-text" id="'+clusterID+'_content">' +
+            element.item +
+            '</p>' +
+            '</a>')
+    }
+
+    return inserted;
+}
+
+ClusterListScheduler.prototype.getElement = function( elementID ) {
+    for( var i=0; i<this.elements.length; i++ ) {
+        if( this.elements[i].clusterID==elementID ) {
+            return this.elements[i];
+        }
+    }
+    return null;
+}
+
+MyClusterListScheduler = new ClusterListScheduler();
+
+$.ManageClusterList = function() {
+    if( true ) {
+        window.setInterval(function () {
+            if ($.loggedin == true) {
+                var request = $.GetCompulsoryVariables();
+                request['action'] = 'getinstances';
+                $.AjaxRequest(request, function (msg) {
+                    clusters = $.parseJSON(msg)[0];
+                    console.log(clusters);
+                    for (var i = 0; i < clusters.length; i++) {
+                        MyClusterListScheduler.addElement(new ClusterListItemSchedulingElement(clusters[i], 10));
+                    }
+
+                });
+            }
+            else {
+                console.log("not logged in");
+            }
+        }, 5000);
+    }
+}
+
+$.ManageClusterList();
 
 ClusterTabClass.prototype.isReady = function() {
 
@@ -53,4 +214,38 @@ ClusterTabClass.prototype.isReady = function() {
     $( "#deleteclusterbutton" ).click(function() {
         $.AjaxRequest({action: "deletecluster", ip: $("#ipnumber").val(), token: $("#tokenid").val() });
     });
+
+    $.clusterListClick = function( clusterNumber ) {
+        var currentElement = MyClusterListScheduler.getElement( clusterNumber );
+        var statusText = "no status text available";
+        var statusTextReason = "no detailed status available";
+        if( currentElement.contentJSONObject &&
+            !jQuery.isEmptyObject( currentElement.contentJSONObject ) ) {
+             statusText = currentElement.contentJSONObject.stack_status;
+             statusTextReason = currentElement.contentJSONObject.stack_status_reason;
+        }
+        $("#clusterstatus").text( statusText );
+        $("#clusterstatustext").text( statusTextReason );
+
+        $("#deleteclusterbutton").click( function() {
+            var request = $.GetCompulsoryVariables();
+            request['action'] = 'deletecluster';
+            request['clusterurl'] = currentElement.item;
+            $.AjaxRequest(request, function (msg) {
+                var result = $.parseJSON(msg);
+                console.log(result);
+            });
+        });
+        $("#newclusterbutton").click( function() {
+
+        });
+        $("#recreateclusterbutton").click( function() {
+
+        });
+
+        console.log( currentElement );
+
+        $('#clusterModal').modal('show');
+    }
+
 };

@@ -65,6 +65,8 @@ $.compulsoryVariables = [
     {"name": "region" }
 ]
 
+$.loggedin = false;
+
 $.GetCompulsoryVariables = function() {
     var requestData = {};
     $.each($.compulsoryVariables, function (i, item) {
