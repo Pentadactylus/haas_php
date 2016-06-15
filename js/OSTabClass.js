@@ -25,41 +25,38 @@ OSTabClass.prototype.isReady = function() {
     if(imagesLoaded==false) {
         imagesLoaded = true;
 
-        $("#tab_os_field").click(function () {
+        var requestData = $.GetCompulsoryVariables();
 
-            var requestData = $.GetCompulsoryVariables();
-
-            requestData['action'] = 'getimages';
-            $.AjaxRequest(JSON.stringify(requestData), function (msg) {
-                MyLogger.info(msg);
-                var imageMaster = $("#icclab\\.haas\\.master\\.image");
-                var imageSlave = $("#icclab\\.haas\\.slave\\.image");
-                json = JSON.parse(msg);
-                $.RemoveAllOptionsAndAddDefaultOption(imageMaster, "select Master image");
-                $.RemoveAllOptionsAndAddDefaultOption(imageSlave, "select Slave image");
-                $.each(json, function (i, item) {
-                    imageMaster.append($("<option>").val(item.id).text(item.image));
-                    imageSlave.append($("<option>").val(item.id).text(item.image));
-                });
-                imageMaster.selectpicker('refresh');
-                imageSlave.selectpicker('refresh');
+        requestData['action'] = 'getimages';
+        $.AjaxRequest(JSON.stringify(requestData), function (msg) {
+            MyLogger.info(msg);
+            var imageMaster = $("#icclab\\.haas\\.master\\.image");
+            var imageSlave = $("#icclab\\.haas\\.slave\\.image");
+            json = JSON.parse(msg);
+            $.RemoveAllOptionsAndAddDefaultOption(imageMaster, "select Master image");
+            $.RemoveAllOptionsAndAddDefaultOption(imageSlave, "select Slave image");
+            $.each(json, function (i, item) {
+                imageMaster.append($("<option>").val(item.id).text(item.image));
+                imageSlave.append($("<option>").val(item.id).text(item.image));
             });
+            imageMaster.selectpicker('refresh');
+            imageSlave.selectpicker('refresh');
+        });
 
-            requestData['action'] = 'getflavors';
-            $.AjaxRequest(JSON.stringify(requestData), function (msg) {
-                MyLogger.info(msg);
-                var flavourMaster = $("#icclab\\.haas\\.master\\.flavor");
-                var flavourSlave = $("#icclab\\.haas\\.slave\\.flavor");
-                json = JSON.parse(msg);
-                $.RemoveAllOptionsAndAddDefaultOption(flavourMaster, "select Master flavour");
-                $.RemoveAllOptionsAndAddDefaultOption(flavourSlave, "select Slave flavour");
-                $.each(json, function (i, item) {
-                    flavourMaster.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
-                    flavourSlave.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
-                });
-                flavourMaster.selectpicker('refresh');
-                flavourSlave.selectpicker('refresh');
+        requestData['action'] = 'getflavors';
+        $.AjaxRequest(JSON.stringify(requestData), function (msg) {
+            MyLogger.info(msg);
+            var flavourMaster = $("#icclab\\.haas\\.master\\.flavor");
+            var flavourSlave = $("#icclab\\.haas\\.slave\\.flavor");
+            json = JSON.parse(msg);
+            $.RemoveAllOptionsAndAddDefaultOption(flavourMaster, "select Master flavour");
+            $.RemoveAllOptionsAndAddDefaultOption(flavourSlave, "select Slave flavour");
+            $.each(json, function (i, item) {
+                flavourMaster.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
+                flavourSlave.append($("<option>").val(item.id).text(item.name + " (" + item.memory + "MB RAM, " + item.vcpu + " VCPU, " + item.disk + "GB Disk)"));
             });
+            flavourMaster.selectpicker('refresh');
+            flavourSlave.selectpicker('refresh');
         });
 
         // doesn't work - fix it
