@@ -47,9 +47,9 @@ class Controller {
         return DISCOConfig::$authurl;
     }
 
-    protected static function getRootFolder() {
-        return DISCOConfig::$rootFolder;
-    }
+//    protected static function getRootFolder() {
+//        return DISCOConfig::$rootFolder;
+//    }
 
     protected static function getLogFile() {
         return DISCOConfig::$logFile;
@@ -184,7 +184,7 @@ class Controller {
     public static function createInstance( $params ) {
         Controller::log("alright");
 
-        $rootFolder = self::getRootFolder();
+//        $rootFolder = self::getRootFolder();
 //        $slavecount = self::checkContent( $params['icclab.haas.slave.number'], 0);
 
         $reqParms = "";
@@ -194,6 +194,9 @@ class Controller {
                 $reqParms .= ",{$key}=\"{$value}\"";
             }
         }
+
+        $reqParms = substr( $reqParms, 1 );
+
         $url = self::getUrl();
         $service = self::getService();
 
@@ -203,7 +206,7 @@ class Controller {
         $region = $params ['region'];
         $curl = self::getCurl();
 
-        $command = "{$curl} -v -X POST {$url}/{$service}/ -H 'Category: {$service}; scheme=\"http://schemas.cloudcomplab.ch/occi/sm#\"; class=\"kind\";' -H 'Content-type: text/occi' -H 'X-Tenant-Name: {$tenant}' -H 'X-Region-Name: {$region}' -H 'X-User-Name: {$username}' -H 'X-Password: {$password}' -H 'X-OCCI-Attribute: icclab.haas.rootfolder=\"{$rootFolder}\"{$reqParms}' 2>&1";
+        $command = "{$curl} -v -X POST {$url}/{$service}/ -H 'Category: {$service}; scheme=\"http://schemas.cloudcomplab.ch/occi/sm#\"; class=\"kind\";' -H 'Content-type: text/occi' -H 'X-Tenant-Name: {$tenant}' -H 'X-Region-Name: {$region}' -H 'X-User-Name: {$username}' -H 'X-Password: {$password}' -H 'X-OCCI-Attribute: {$reqParms}' 2>&1";
         # if the SO is to be deleted, I can just send the delete command to the SM (of course, to the appropriate address: url/oterm/serviceOrchestratorID) so that it gets deleted
         $result = self::obSystem($command);
         $retval = array();
@@ -222,7 +225,7 @@ class Controller {
 
     public static function getInstances( $params ) {
 
-        $rootFolder = self::getRootFolder();
+//        $rootFolder = self::getRootFolder();
 
         $url = self::getUrl();
         $service = self::getService();
@@ -250,12 +253,18 @@ class Controller {
         $pattern = "#http://[^ ,\r\n]*#";
         preg_match_all( $pattern, $reqline, $matches);
 
+//        $retVal = Array();
+//
+//        for( $i=0; $i<count($matches); $i++ ) {
+//
+//        }
+
         return Zend\Json\Json::encode($matches);
     }
 
     public static function getClusterInfo( $params ) {
 
-        $rootFolder = self::getRootFolder();
+//        $rootFolder = self::getRootFolder();
 
         $url = self::getUrl();
         $service = self::getService();
