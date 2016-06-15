@@ -19,9 +19,9 @@ ClusterTabClass.prototype.drawInterface = function() {
     <h4 class="modal-title">Cluster x</h4>\
     </div>\
     <div class="modal-body">\
-        <p>State: <span id="clusterstatus"></span></p>\
-        <p>Status text: <span id="clusterstatustext"></span></p>\
-        <p>IP address: <span id="masterip"></span></p>\
+        <p><span style="font-weight: bold; ">State:</span> <span id="clusterstatus"></span></p>\
+        <p><span style="font-weight: bold; ">Status text:</span> <span id="clusterstatustext"></span></p>\
+        <p><span style="font-weight: bold; ">IP address:</span> <span id="masterip"></span></p>\
         <button type="button" class="btn btn-info" id="recreateclusterbutton">Re-create same cluster</button>\
     <button type="button" class="btn btn-success" id="newclusterbutton">New cluster with same specifics</button>\
     <button type="button" class="btn btn-danger" id="deleteclusterbutton">Delete cluster</button>\
@@ -68,7 +68,6 @@ ClusterListItemSchedulingElement.prototype.loadContent = function() {
     var self = this;
 
     $.AjaxRequest(request, function (msg) {
-        //var curScheduler = new ClusterListScheduler();
         cluster = $.parseJSON(msg);
         self.contentJSONObject = cluster;
         self.loaded = true;
@@ -82,8 +81,12 @@ ClusterListItemSchedulingElement.prototype.loadContent = function() {
             self.loadContent();
         }, curReloadTime);
         $("#"+self.clusterID+"_link").css("background",curBackgroundColor);
+
+        if($.displayedCluster==self.clusterID) {
+            $.updateClusterWindow();
+        }
         console.log(cluster.stack_status);
-        console.log(cluster);
+        //console.log(cluster);
     });
 }
 
@@ -160,10 +163,17 @@ $.ManageClusterList = function() {
                 var request = $.GetCompulsoryVariables();
                 request['action'] = 'getinstances';
                 $.AjaxRequest(request, function (msg) {
+                    var currentClusters = new Array();
                     clusters = $.parseJSON(msg)[0];
                     console.log(clusters);
                     for (var i = 0; i < clusters.length; i++) {
+                        currentClusters.push(clusters[i]);
                         MyClusterListScheduler.addElement(new ClusterListItemSchedulingElement(clusters[i], 10));
+                    }
+                    for (var i=0; i < MyClusterListScheduler.elements.length; i++ ) {
+                        if( currentClusters.indexOf(MyClusterListScheduler.elements[i].item)==-1 ) {
+                            $("#"+MyClusterListScheduler.elements[i].clusterID+"_link").css("display","none");
+                        }
                     }
 
                 });
@@ -215,37 +225,48 @@ ClusterTabClass.prototype.isReady = function() {
         $.AjaxRequest({action: "deletecluster", ip: $("#ipnumber").val(), token: $("#tokenid").val() });
     });
 
-    $.clusterListClick = function( clusterNumber ) {
-        var currentElement = MyClusterListScheduler.getElement( clusterNumber );
-        var statusText = "no status text available";
-        var statusTextReason = "no detailed status available";
-        if( currentElement.contentJSONObject &&
-            !jQuery.isEmptyObject( currentElement.contentJSONObject ) ) {
-             statusText = currentElement.contentJSONObject.stack_status;
-             statusTextReason = currentElement.contentJSONObject.stack_status_reason;
-        }
-        $("#clusterstatus").text( statusText );
-        $("#clusterstatustext").text( statusTextReason );
+    $.clusterListClick = function( clusterID ) {
 
-        $("#deleteclusterbutton").click( function() {
-            var request = $.GetCompulsoryVariables();
-            request['action'] = 'deletecluster';
-            request['clusterurl'] = currentElement.item;
-            $.AjaxRequest(request, function (msg) {
-                var result = $.parseJSON(msg);
-                console.log(result);
-            });
-        });
-        $("#newclusterbutton").click( function() {
-
-        });
-        $("#recreateclusterbutton").click( function() {
-
-        });
-
-        console.log( currentElement );
+        $.displayedCluster = clusterID;
+        $.updateClusterWindow();
+        //console.log( currentElement );
 
         $('#clusterModal').modal('show');
     }
 
 };
+
+$.displayedCluster = false;
+$.updateClusterWindow = function() {
+    var currentElement = MyClusterListScheduler.getElement($.displayedCluster );
+    var statusText = "no status text available";
+    var statusTextReason = "no detailed status available";
+    var masterIP = "N/A";
+
+    if( currentElement.contentJSONObject &&
+        !jQuery.isEmptyObject( currentElement.contentJSONObject ) ) {
+        statusText = currentElement.contentJSONObject.stack_status;
+        statusTextReason = currentElement.contentJSONObject.stack_status_reason;
+        masterIP = currentElement.contentJSONObject.externalIP;
+    }
+    $("#clusterstatus").text( statusText );
+    $("#clusterstatustext").text( statusTextReason );
+    $("#masterip").text( masterIP );
+
+    $("#deleteclusterbutton").click( function() {
+        var request = $.GetCompulsoryVariables();
+        request['action'] = 'deletecluster';
+        request['clusterurl'] = currentElement.item;
+        $.AjaxRequest(request, function (msg) {
+            var result = $.parseJSON(msg);
+            console.log(result);
+        });
+        $('#clusterModal').modal('hide');
+    });
+    $("#newclusterbutton").click( function() {
+
+    });
+    $("#recreateclusterbutton").click( function() {
+
+    });
+}
