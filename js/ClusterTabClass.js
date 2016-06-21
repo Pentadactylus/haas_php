@@ -3,9 +3,17 @@ var ClusterTabClass = function( container ) {
     this.selector = container;
 }
 
+$("#cluster_tab_field").click( function() {
+    $.reloadClusterList();
+});
+
 ClusterTabClass.prototype.drawInterface = function() {
     $(this.selector).append( "<div class='tab-pane panel panel-info withpadding' id='tab_organisation'>" +
         "<h4 class='panel-heading'>Cluster Organisation</h4>" +
+        '<div class="row">' +
+        '<div class="col-md-4">last updated: <span id="lastUpdatedTag">N/A</span></div>' +
+        '<div class="col-md-4"><button class="btn btn-default" id="clusterReloadButton">reload</button></div>' +
+        '</div>' +
 
         '<div class="list-group" id="clusterlist"></div>'+
         "</div>" +
@@ -39,6 +47,33 @@ ClusterTabClass.prototype.drawInterface = function() {
 
 }
 
+$.reloadClusterListTime = 60;
+
+$.reloadClusterList = function() {
+    if ($.loggedin == true) {
+        var request = $.GetCompulsoryVariables();
+        request['action'] = 'getinstances';
+        $.AjaxRequest(request, function (msg) {
+            var currentClusters = new Array();
+            clusters = $.parseJSON(msg)[0];
+            console.log(clusters);
+            for (var i = 0; i < clusters.length; i++) {
+                currentClusters.push(clusters[i]);
+                MyClusterListScheduler.addElement(new ClusterListItemSchedulingElement(clusters[i], 10));
+            }
+            for (var i=0; i < MyClusterListScheduler.elements.length; i++ ) {
+                if( currentClusters.indexOf(MyClusterListScheduler.elements[i].item)==-1 ) {
+                    $("#"+MyClusterListScheduler.elements[i].clusterID+"_link").css("display","none");
+                }
+            }
+            $("#lastUpdatedTag").text(new Date().toTimeString());
+        });
+    }
+    else {
+        console.log("not logged in");
+    }
+}
+
 var ClusterListItemSchedulingElement = function( item, intervalRate ) {
     this.intervalRate = intervalRate;
     this.currentValue = intervalRate;
@@ -54,11 +89,11 @@ ClusterListItemSchedulingElement.prototype.getIntervalRate = function() {
 
 ClusterListItemSchedulingElement.prototype.loadContent = function() {
     var valueSpecificProps = {
-        "CREATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#ccccff" },
-        "UPDATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#ccccff" },
-        "CREATE_COMPLETE": { reloadTime: 20, backgroundColor: "#aaffaa" },
-        "CREATE_FAILED": { reloadTime: 60, backgroundColor: "#ffcccc" },
-        "default": { reloadTime: 60, backgroundColor: "#eeeeee" }
+        "CREATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#fff", panelClass: "panel-info" },
+        "UPDATE_IN_PROGRESS": { reloadTime: 5, backgroundColor: "#fff", panelClass: "panel-info" },
+        "CREATE_COMPLETE": { reloadTime: 100, backgroundColor: "#fff", panelClass: "panel-success" },
+        "CREATE_FAILED": { reloadTime: 600, backgroundColor: "#fff", panelClass: "panel-danger" },
+        "default": { reloadTime: 600, backgroundColor: "#fff", panelClass: "panel-warning" }
     };
 
     var request = $.GetCompulsoryVariables();
@@ -73,14 +108,17 @@ ClusterListItemSchedulingElement.prototype.loadContent = function() {
         self.loaded = true;
         var curReloadTime = valueSpecificProps["default"].reloadTime;
         var curBackgroundColor = valueSpecificProps["default"].backgroundColor;
+        var curPanelClass = valueSpecificProps["default"].panelClass;
         if( cluster.stack_status ) {
             curReloadTime = valueSpecificProps[cluster.stack_status].reloadTime;
             curBackgroundColor = valueSpecificProps[cluster.stack_status].backgroundColor;
+            curPanelClass = valueSpecificProps[cluster.stack_status].panelClass;
         }
         window.setTimeout(function() {
             self.loadContent();
-        }, curReloadTime);
+        }, curReloadTime*1000);
         $("#"+self.clusterID+"_link").css("background",curBackgroundColor);
+        $("#"+self.clusterID+"_link").attr("class","panel "+curPanelClass);
 
         if($.displayedCluster==self.clusterID) {
             $.updateClusterWindow();
@@ -132,14 +170,14 @@ ClusterListScheduler.prototype.addElement = function( element ) {
         var clusterID = element.item.replace(/.*haas\/(.*)/g,"$1");
         element.clusterID = clusterID;
         console.log("clusterid = "+clusterID );
-        $('#clusterlist').append('<a href="#" class="list-group-item" onclick="$.clusterListClick(\''+element.clusterID+'\')" id="'+clusterID+'_link">' +
-            '<h4 class="list-group-item-heading" id="'+clusterID+'_header">' +
+        $('#clusterlist').append('<div href="#" class="panel panel-info" onclick="$.clusterListClick(\''+element.clusterID+'\')" id="'+clusterID+'_link">' +
+            '<div class="panel-heading" id="'+clusterID+'_header">' +
             'Distributed Computing Cluster' +
-            '</h4>' +
-            '<p class="list-group-item-text" id="'+clusterID+'_content">' +
+            '</div>' +
+            '<div class="panel-body" id="'+clusterID+'_content">' +
             element.item +
-            '</p>' +
-            '</a>')
+            '</div>' +
+            '</div>')
     }
 
     return inserted;
@@ -159,29 +197,8 @@ MyClusterListScheduler = new ClusterListScheduler();
 $.ManageClusterList = function() {
     if( true ) {
         window.setInterval(function () {
-            if ($.loggedin == true) {
-                var request = $.GetCompulsoryVariables();
-                request['action'] = 'getinstances';
-                $.AjaxRequest(request, function (msg) {
-                    var currentClusters = new Array();
-                    clusters = $.parseJSON(msg)[0];
-                    console.log(clusters);
-                    for (var i = 0; i < clusters.length; i++) {
-                        currentClusters.push(clusters[i]);
-                        MyClusterListScheduler.addElement(new ClusterListItemSchedulingElement(clusters[i], 10));
-                    }
-                    for (var i=0; i < MyClusterListScheduler.elements.length; i++ ) {
-                        if( currentClusters.indexOf(MyClusterListScheduler.elements[i].item)==-1 ) {
-                            $("#"+MyClusterListScheduler.elements[i].clusterID+"_link").css("display","none");
-                        }
-                    }
-
-                });
-            }
-            else {
-                console.log("not logged in");
-            }
-        }, 5000);
+            $.reloadClusterList();
+        }, $.reloadClusterListTime*1000);
     }
 }
 
@@ -207,6 +224,11 @@ ClusterTabClass.prototype.isReady = function() {
             clearInterval(refreshId);
         }
     });
+
+    $("#clusterReloadButton").click( function() {
+        $.reloadClusterList();
+    });
+
 
 
     $("#clusterstatebutton").click( function () {
@@ -234,6 +256,62 @@ ClusterTabClass.prototype.isReady = function() {
         $('#clusterModal').modal('show');
     }
 
+
+    $("#deleteclusterbutton").click( function() {
+        var currentElement = MyClusterListScheduler.getElement($.displayedCluster );
+        var request = $.GetCompulsoryVariables();
+        request['action'] = 'deletecluster';
+        request['clusterurl'] = currentElement.item;
+        $.AjaxRequest(request, function (msg) {
+            var result = $.parseJSON(msg);
+            console.log(result);
+            window.setTimeout($.updateClusterWindow(),1000);
+        });
+        $('#clusterModal').modal('hide');
+    });
+
+    $("#newclusterbutton").click( function() {
+        var currentElement = MyClusterListScheduler.getElement($.displayedCluster );
+        var props = $.getClusterProperties( currentElement.contentJSONObject);
+        var reqVars = $.GetCompulsoryVariables();
+        for( var attrname in props ) {
+            reqVars[attrname] = props[attrname];
+        }
+        reqVars['action'] = 'createinstance';
+        console.log( reqVars );
+
+        $.AjaxRequest(JSON.stringify(reqVars),function(msg) {
+            console.log(msg);
+            window.setTimeout($.updateClusterWindow(),1000);
+            //bootbox.alert(msg);
+        });
+    });
+
+    $("#recreateclusterbutton").click( function() {
+        var currentElement = MyClusterListScheduler.getElement($.displayedCluster );
+        var request = $.GetCompulsoryVariables();
+        var props = $.getClusterProperties( currentElement.contentJSONObject);
+        var reqVars = $.GetCompulsoryVariables();
+        for( var attrname in props ) {
+            reqVars[attrname] = props[attrname];
+        }
+        reqVars['action'] = 'createinstance';
+        console.log( reqVars );
+
+        request['action'] = 'deletecluster';
+        request['clusterurl'] = currentElement.item;
+        $.AjaxRequest(request, function (msg) {
+            var result = $.parseJSON(msg);
+            console.log(result);
+
+            $.AjaxRequest(JSON.stringify(reqVars),function(msg) {
+                console.log(msg);
+                window.setTimeout($.updateClusterWindow(),1000);
+                //bootbox.alert(msg);
+            });
+        });
+        $('#clusterModal').modal('hide');
+    });
 };
 
 $.displayedCluster = false;
@@ -253,20 +331,16 @@ $.updateClusterWindow = function() {
     $("#clusterstatustext").text( statusTextReason );
     $("#masterip").text( masterIP );
 
-    $("#deleteclusterbutton").click( function() {
-        var request = $.GetCompulsoryVariables();
-        request['action'] = 'deletecluster';
-        request['clusterurl'] = currentElement.item;
-        $.AjaxRequest(request, function (msg) {
-            var result = $.parseJSON(msg);
-            console.log(result);
-        });
-        $('#clusterModal').modal('hide');
-    });
-    $("#newclusterbutton").click( function() {
+}
 
+$.getClusterProperties = function( propertyObject ) {
+    console.log(propertyObject);
+    var retVal = new Array();
+    $.each( propertyObject, function( key, value ) {
+        if( key.startsWith( "icclab.haas.")) {
+            console.log(key + ": " + value);
+            retVal[key] = value;
+        }
     });
-    $("#recreateclusterbutton").click( function() {
-
-    });
+    return retVal;
 }
