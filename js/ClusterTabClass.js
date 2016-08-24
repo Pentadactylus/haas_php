@@ -321,7 +321,8 @@ $.updateClusterWindow = function() {
     var statusTextReason = "no detailed status available";
     var masterIP = "N/A";
 
-    if( currentElement.contentJSONObject &&
+    if( currentElement!=null &&
+        currentElement.contentJSONObject &&
         !jQuery.isEmptyObject( currentElement.contentJSONObject ) ) {
         statusText = currentElement.contentJSONObject.stack_status;
         statusTextReason = currentElement.contentJSONObject.stack_status_reason;
