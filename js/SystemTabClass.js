@@ -12,8 +12,8 @@ SystemTabClass.prototype.drawInterface = function() {
         "<p>what's the slave's name?<input type='text' class='form-control' id='icclab.haas.slave.name' placeholder='enter the slave's name'></p>" +
         "<p># Slaves<input type='text' class='form-control' id='icclab.haas.slave.number' placeholder='enter amount of slave nodes'></p>" +
         "<p>should a slave node be started on the master(s) as well?<input type='checkbox' id='icclab.haas.master.slaveonmaster' data-reverse></p>" +
-        "<p>Which volume contains the software to be installed?<br>" +
-        "<!--<select id='icclab.haas.master.imageid' class='selectpicker'></select></p>-->" +
+        "<!--<p>Which volume contains the software to be installed?<br>" +
+        "<select id='icclab.haas.master.imageid' class='selectpicker'></select></p>-->" +
         "</div>" );
 
 }
